@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"path"
 
+	cid "gx/ipfs/QmTprEaAA2A9bst5XH7exuyi5KzNMK3SEDNN8rBDnKWcUS/go-cid"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
 
 	"github.com/ipfs/go-ipfs/core"
 	"github.com/julienschmidt/httprouter"
-	"github.com/sheremetat/dapp/common"
+	"github.com/sheremetat/dapp-ajs/common"
 )
 
 //struct to handle the IPFS core node
@@ -75,7 +76,6 @@ func displayUsers(node *core.IpfsNode) httprouter.Handle {
 		for i := range data {
 			data[i] = peer.IDB58Encode(peers[i])
 		}
-		fmt.Println("the peers are %s", data)
 
 		//send the peer list to the front end template
 		demoheader := PeerList{Allpeers: data, Balance: 0}
@@ -103,7 +103,8 @@ func TextInput(node *core.IpfsNode) httprouter.Handle {
 		//[1] If its your home profile page
 		if userID == "" {
 			pointsTo, err := common.GetDAG(node, node.Identity.Pretty())
-			tweetArray, err := common.GetStrings(node, pointsTo)
+			cid, _ := cid.Parse(pointsTo.String())
+			tweetArray, err := common.GetStrings(node, cid.String())
 
 			if err != nil {
 				fmt.Println("WHOOPS", err)
@@ -161,7 +162,7 @@ func TextInput(node *core.IpfsNode) httprouter.Handle {
 				//[2B] Else send tweetarray
 				fmt.Println("RESOLVED")
 				//else pull it from the URL
-				tweetArray, err := common.GetStrings(node, pointsTo)
+				tweetArray, err := common.GetStrings(node, pointsTo.String())
 				if err != nil {
 					panic(err)
 				}
